@@ -1,33 +1,40 @@
 package com.zaidimarvels.voiceapp;
 
+
 import android.content.Intent;
+
 import android.os.Build;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.text.format.DateUtils;
+
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.util.Date;
+import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Locale;
+
+
 
 public class Formulaire extends AppCompatActivity {
     private TextToSpeech tts;
     private SpeechRecognizer speechRecog;
     private EditText text1,text2,text3,text4;
-    private static  List<String> sp;
+    List<String> resultss;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_formulaire );
 
+
+        resultss = new ArrayList<>();
 
         text1=findViewById( R.id.editText );
         text2=findViewById( R.id.editText2 );
@@ -62,9 +69,6 @@ public class Formulaire extends AppCompatActivity {
                 @Override
                 public void onBufferReceived(byte[] buffer) {
 
-
-
-
                 }
 
                 @Override
@@ -79,14 +83,8 @@ public class Formulaire extends AppCompatActivity {
 
                 @Override
                 public void onResults(Bundle results) {
-                    List<String> speet = results.getStringArrayList( SpeechRecognizer.RESULTS_RECOGNITION );
-                      text1.setText(speet.get(0));
-                      onStart();
-                    if(text1.getText().toString()!=null){
-                        text3.setText(speet.get(1));
-
-
-                    }
+                    List<String> result_arr = results.getStringArrayList( SpeechRecognizer.RESULTS_RECOGNITION );
+                    processResult( result_arr.get( 0 ));
                 }
 
                 @Override
@@ -112,7 +110,13 @@ public class Formulaire extends AppCompatActivity {
                 } else {
                     tts.setLanguage( Locale.US );
                     speak( "Complete the name" );
+
+
+
                 }
+
+
+
 
             }
         } );
@@ -131,14 +135,38 @@ public class Formulaire extends AppCompatActivity {
     }
 
 
+    private void processResult(String result_message ) {
 
 
+        resultss.add( result_message );
 
 
+        result_message = result_message.toLowerCase();
+        if (resultss.size() == 1){
+
+            text1.setText( resultss.get( 0 ) );
+            speak( "complete the last name" );
+        }else if (resultss.size() == 2){
+            text2.setText( resultss.get( 1 ) );
+        }else if (resultss.size() == 3){
+            text3.setText( resultss.get( 2 ) );
+        }else if (resultss.size() == 4){
+            text4.setText( resultss.get( 3 ) );
+        }
+
+        onResume();
 
 
+    }
 
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        Reinitialize the recognizer and tts engines upon resuming from background such as after openning the browser
+        initializeSpeechRecognizer();
+        initializeTextToSpeech();
+    }
 
 
 }
