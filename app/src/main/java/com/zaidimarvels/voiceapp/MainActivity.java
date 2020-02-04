@@ -38,43 +38,50 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Here, thisActivity is the current activity
-                if (ContextCompat.checkSelfPermission(MainActivity.this,
-                        Manifest.permission.RECORD_AUDIO)
-                        != PackageManager.PERMISSION_GRANTED) {
 
-                    // Permission is not granted
-                    // Should we show an explanation?
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                            Manifest.permission.RECORD_AUDIO)) {
-                        // Show an explanation to the user *asynchronously* -- don't block
-                        // this thread waiting for the user's response! After the user
-                        // sees the explanation, try again to request the permission.
-                    } else {
-                        // No explanation needed; request the permission
-                        ActivityCompat.requestPermissions(MainActivity.this,
-                                new String[]{Manifest.permission.RECORD_AUDIO},MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
 
-                        // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                        // app-defined int constant. The callback method gets the
-                        // result of the request.
-                    }
-                } else {
-                    // Permission has already been granted
-                    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                    intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,1);
-                    speechRecog.startListening(intent);
-                }
-            }
-        });
-        
         initializeTextToSpeech();
         initializeSpeechRecognizer();
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                    Manifest.permission.RECORD_AUDIO)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.RECORD_AUDIO},MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            // Permission has already been granted
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,1);
+            speechRecog.startListening(intent);
+        }
+    }
+
+
+
+
+    /**
+     *
+     */
 
     private void initializeSpeechRecognizer() {
         if (SpeechRecognizer.isRecognitionAvailable(this)) {
@@ -141,19 +148,23 @@ public class MainActivity extends AppCompatActivity {
         if(result_message.indexOf("what") != -1){
             if(result_message.indexOf("your name") != -1){
                 speak("My Name is Mr.Android. Nice to meet you!");
+                onStart();
             }
             if (result_message.indexOf("time") != -1){
                 String time_now = DateUtils.formatDateTime(this, new Date().getTime(),DateUtils.FORMAT_SHOW_TIME);
                 speak("The time is now: " + time_now);
+                onStart();
             }
         } else if (result_message.indexOf("earth") != -1){
             speak("Don't be silly, The earth is a sphere. As are all other planets and celestial bodies");
-        } else if (result_message.indexOf("browser") != -1){
-            speak("Opening a browser right away master.");
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://youtu.be/AnNJPf-4T70"));
+        } else if (result_message.indexOf("welcome") != -1){
+            speak("Opening a form right away master.");
+            Intent intent = new Intent(MainActivity.this,Formulaire.class);
             startActivity(intent);
         }
-    }
+        else if (result_message.indexOf("") != -1){
+            speak("don't understand");
+        }}
 
     private void initializeTextToSpeech() {
         tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
@@ -164,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
                     finish();
                 } else {
                     tts.setLanguage(Locale.US);
-                    speak("Hello there, I am ready to start our conversation");
+                    speak("Hello there, I am ready to start our Qualipro");
                 }
             }
         });
@@ -200,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
+   /* @Override
     protected void onPause() {
         super.onPause();
         tts.shutdown();
@@ -212,5 +223,5 @@ public class MainActivity extends AppCompatActivity {
 //        Reinitialize the recognizer and tts engines upon resuming from background such as after openning the browser
         initializeSpeechRecognizer();
         initializeTextToSpeech();
-    }
+    }*/
 }
